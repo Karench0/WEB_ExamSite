@@ -1,5 +1,4 @@
-/* eslint-disable no-console */
-// Configuration constants
+
 const API_URL = 'http://exam-api-courses.std-900.ist.mospolytech.ru/api';
 const API_KEY = 'df3ddd20-e6f4-42a6-a275-d7ac1de8a55f'; 
 
@@ -10,7 +9,7 @@ let filteredCourses = [];
 let currentPage = 1;
 const recordsPerPage = 5;
 
-// Initialize application on DOM load
+
 document.addEventListener('DOMContentLoaded', () => {
     fetchCourses();
     fetchTutors();
@@ -21,9 +20,6 @@ document.addEventListener('DOMContentLoaded', () => {
 // COURSES LOGIC
 // ------------------------------------------
 
-/**
- * Fetches course data from the API and initializes filtering.
- */
 async function fetchCourses() {
     try {
         const response = await fetch(`${API_URL}/courses?api_key=${API_KEY}`);
@@ -44,29 +40,21 @@ async function fetchCourses() {
     }
 }
 
-/**
- * Applies search and level filters to the course list.
- */
 function applyCourseFilters() {
     const searchName = document.getElementById('search-course-name').value.toLowerCase().trim();
     const filterLevel = document.getElementById('filter-course-level').value;
 
     filteredCourses = coursesData.filter(course => {
         const matchesName = course.name.toLowerCase().includes(searchName);
-        // Strict comparison for level values from API
         const matchesLevel = filterLevel === "" || course.level === filterLevel;
         return matchesName && matchesLevel;
     });
 
-    // Reset to first page after filtering
     currentPage = 1; 
     renderCourses(1);
 }
 
-/**
- * Renders the table of courses for the current page.
- * @param {number} page - The page number to display.
- */
+
 function renderCourses(page) {
     currentPage = page;
     const start = (page - 1) * recordsPerPage;
@@ -95,9 +83,7 @@ function renderCourses(page) {
     renderPagination();
 }
 
-/**
- * Renders pagination controls for the course table.
- */
+
 function renderPagination() {
     const totalPages = Math.ceil(filteredCourses.length / recordsPerPage);
     const pagination = document.getElementById('courses-pagination');
@@ -142,16 +128,12 @@ function renderPagination() {
 // TUTORS LOGIC
 // ------------------------------------------
 
-/**
- * Fetches tutor data and initializes tutor list.
- */
 async function fetchTutors() {
     try {
         const response = await fetch(`${API_URL}/tutors?api_key=${API_KEY}`);
         if (!response.ok) throw new Error('API Error');
         allTutorsData = await response.json();
         
-        // Setup filter listeners
         document.getElementById('filter-tutor-language').addEventListener('change', applyTutorFilters);
         document.getElementById('filter-tutor-exp').addEventListener('input', applyTutorFilters);
         
@@ -162,17 +144,13 @@ async function fetchTutors() {
     }
 }
 
-/**
- * Filters tutors based on language and experience.
- */
+
 function applyTutorFilters() {
     const selectedLang = document.getElementById('filter-tutor-language').value;
     const minExp = parseInt(document.getElementById('filter-tutor-exp').value) || 0;
 
     const filtered = allTutorsData.filter(tutor => {
-        // Check if tutor speaks the selected language (if any)
         const matchesLang = selectedLang === "" || tutor.languages_spoken.includes(selectedLang);
-        // Check experience threshold
         const matchesExp = tutor.work_experience >= minExp;
         
         return matchesLang && matchesExp;
@@ -181,10 +159,7 @@ function applyTutorFilters() {
     renderTutors(filtered);
 }
 
-/**
- * Renders the list of tutor cards.
- * @param {Array} tutors - List of tutor objects.
- */
+
 function renderTutors(tutors) {
     const container = document.getElementById('tutors-container');
     container.innerHTML = '';
@@ -214,9 +189,6 @@ function renderTutors(tutors) {
 // ORDER MODAL & UTILS
 // ------------------------------------------
 
-/**
- * Sets minimum value for all date inputs to current date + 1 day.
- */
 function setMinimumDate() {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
@@ -226,41 +198,32 @@ function setMinimumDate() {
 
 let currentCourse = null;
 
-/**
- * Opens the order modal for a specific course.
- * @param {number} courseId - ID of the selected course.
- */
+
 function openOrderModal(courseId) {
     currentCourse = coursesData.find(c => c.id === courseId);
     if (!currentCourse) return;
 
-    // Reset form fields
     const form = document.getElementById('order-form');
     form.reset();
     
-    // Fill course details
     document.getElementById('course-id').value = currentCourse.id;
     document.getElementById('course-name').value = currentCourse.name;
     const totalHours = currentCourse.total_length * currentCourse.week_length;
     document.getElementById('duration').value = totalHours;
 
-    // Initialize calculation
     calculatePrice();
 
     const modal = new bootstrap.Modal(document.getElementById('orderModal'));
     modal.show();
 }
 
-/**
- * Calculates total price based on form inputs and course rates.
- */
+
 function calculatePrice() {
     if (!currentCourse) return;
 
     let price = currentCourse.course_fee_per_hour * (currentCourse.total_length * currentCourse.week_length);
     const persons = parseInt(document.getElementById('persons-count').value) || 1;
     
-    // Time-based surcharges
     const timeStart = document.getElementById('start-time').value;
     if (timeStart) {
         const hour = parseInt(timeStart.split(':')[0]);
@@ -268,7 +231,6 @@ function calculatePrice() {
         else if (hour >= 18 && hour <= 20) price += 1000;
     }
 
-    // Weekend surcharge
     const dateStart = new Date(document.getElementById('start-date').value);
     if (!isNaN(dateStart)) {
         const day = dateStart.getDay();
@@ -277,14 +239,12 @@ function calculatePrice() {
 
     price *= persons;
 
-    // Additional options
     if (document.getElementById('early-registration').checked) price *= 0.9;
     if (document.getElementById('intensive-course').checked) price *= 1.2;
     if (document.getElementById('supplementary').checked) price += 2000 * persons;
     if (document.getElementById('personalized').checked) price += 1500 * currentCourse.total_length;
     if (document.getElementById('excursions').checked) price *= 1.25;
     
-    // Group discount
     if (persons >= 5) price *= 0.85; 
 
     document.getElementById('total-price').innerText = Math.round(price);
@@ -294,9 +254,7 @@ function calculatePrice() {
 document.getElementById('order-form').addEventListener('change', calculatePrice);
 document.getElementById('order-form').addEventListener('input', calculatePrice);
 
-/**
- * Handles order form submission via POST request.
- */
+
 document.getElementById('submit-order-btn').addEventListener('click', async () => {
     const form = document.getElementById('order-form');
     if (!form.checkValidity()) {
@@ -342,11 +300,7 @@ document.getElementById('submit-order-btn').addEventListener('click', async () =
     }
 });
 
-/**
- * Displays a temporary alert message to the user.
- * @param {string} message - Text to display.
- * @param {string} type - Bootstrap alert type (success, danger, warning).
- */
+
 function showAlert(message, type) {
     const container = document.getElementById('alerts-container');
     const wrapper = document.createElement('div');

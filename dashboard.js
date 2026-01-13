@@ -1,23 +1,19 @@
-/* eslint-disable no-console */
-// Configuration
+
 const API_URL = 'http://exam-api-courses.std-900.ist.mospolytech.ru/api';
 const API_KEY = 'df3ddd20-e6f4-42a6-a275-d7ac1de8a55f'; 
 
-// State Management
+
 let allOrders = [];
 let currentOrderBasePrice = 0;
 let currentPage = 1;
 const recordsPerPage = 5;
 
-// Initialization
+
 document.addEventListener('DOMContentLoaded', () => {
     fetchOrders();
     setMinimumDate(); 
 });
 
-/**
- * Fetches orders from the API and initializes the table.
- */
 async function fetchOrders() {
     try {
         const response = await fetch(`${API_URL}/orders?api_key=${API_KEY}`);
@@ -25,7 +21,6 @@ async function fetchOrders() {
         
         allOrders = await response.json();
         
-        // Sort orders by creation date (descending)
         allOrders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
         renderOrders(1);
@@ -35,10 +30,7 @@ async function fetchOrders() {
     }
 }
 
-/**
- * Renders the table of orders for the specified page.
- * @param {number} page - The page number to render.
- */
+
 function renderOrders(page) {
     currentPage = page;
     const start = (page - 1) * recordsPerPage;
@@ -76,15 +68,13 @@ function renderOrders(page) {
     renderPagination();
 }
 
-/**
- * Renders pagination controls with Next/Prev buttons.
- */
+
 function renderPagination() {
     const totalPages = Math.ceil(allOrders.length / recordsPerPage);
     const pagination = document.getElementById('orders-pagination');
     pagination.innerHTML = '';
 
-    // Hide pagination if single page or no data
+ 
     if (totalPages <= 1) return;
 
     // Previous Button
@@ -120,9 +110,7 @@ function renderPagination() {
     pagination.appendChild(nextLi);
 }
 
-/**
- * Sets the minimum date for date inputs to "tomorrow".
- */
+
 function setMinimumDate() {
     const today = new Date();
     const tomorrow = new Date(today);
@@ -139,9 +127,6 @@ function setMinimumDate() {
     });
 }
 
-/**
- * Recalculates order price based on selected options in Edit Modal.
- */
 function calculateDynamicPrice() {
     const personsInput = document.getElementById('edit-persons');
     const persons = parseInt(personsInput.value) || 1;
@@ -159,10 +144,7 @@ function calculateDynamicPrice() {
 document.getElementById('edit-order-form').addEventListener('input', calculateDynamicPrice);
 document.getElementById('edit-order-form').addEventListener('change', calculateDynamicPrice);
 
-/**
- * Fetches and displays order details in a modal.
- * @param {number} id - Order ID
- */
+
 async function viewOrder(id) {
     try {
         const res = await fetch(`${API_URL}/orders/${id}?api_key=${API_KEY}`);
@@ -195,10 +177,6 @@ async function viewOrder(id) {
     }
 }
 
-/**
- * Prepares and opens the Edit Modal for a specific order.
- * @param {number} id - Order ID
- */
 async function editOrder(id) {
     try {
         const res = await fetch(`${API_URL}/orders/${id}?api_key=${API_KEY}`);
