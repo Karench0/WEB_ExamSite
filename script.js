@@ -12,34 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchCourses();
     fetchTutors();
     setMinimumDate();
-    initMap();
 });
-
-
-async function initMap() {
-    // Проверяем, загрузилась ли библиотека, чтобы не было ReferenceError
-    if (typeof ymaps3 === 'undefined') {
-        console.error("Библиотека Яндекс.Карт не загружена. Проверьте API-ключ и доступ к сети.");
-        return;
-    }
-
-    try {
-        await ymaps3.ready;
-        const {YMap, YMapDefaultSchemeLayer, YMapDefaultFeaturesLayer} = ymaps3;
-
-        const map = new YMap(document.getElementById('map'), {
-            location: {
-                center: [37.588144, 55.733842],
-                zoom: 10
-            }
-        });
-
-        map.addChild(new YMapDefaultSchemeLayer());
-        map.addChild(new YMapDefaultFeaturesLayer()); // Важно для отображения объектов
-    } catch (e) {
-        console.error("Ошибка при создании карты:", e);
-    }
-}
 
 // --- ЛОГИКА КУРСОВ ---
 
@@ -340,3 +313,4 @@ function showAlert(message, type) {
         wrapper.remove();
     }, 5000);
 }
+
